@@ -27,7 +27,6 @@ const OrderSchema = new Schema(
     //for Tap payment
     chargeId: {
       type: String,
-      
     },
     paymentStatus: {
       type: String,

@@ -99,11 +99,10 @@ export const createOrderCtrl = asyncHandler(async (req, res) => {
       redirect: {url: 'http://localhost:3000/success'}
     }
   };
-  
+
   axios
     .request(options)
     .then(function (response) {
-      //console.log(response.data);
       res.send({ url: response.data.transaction.url });
     })
     .catch(function (error) {
@@ -135,6 +134,7 @@ export const getSingleOrderCtrl = asyncHandler(async (req, res) => {
   //get the id from params
   const id = req.params.id;
   const order = await Order.findById(id);
+
   //send response
   res.status(200).json({
     success: true,

@@ -24,7 +24,11 @@ const OrderSchema = new Schema(
       type: String,
       default: randomTxt + randomNumbers,
     },
-    //for stripe payment
+    //for Tap payment
+    chargeId: {
+      type: String,
+      
+    },
     paymentStatus: {
       type: String,
       default: "Not paid",

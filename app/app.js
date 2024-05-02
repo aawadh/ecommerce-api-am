@@ -2,7 +2,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import Stripe from "stripe";
 dotenv.config();
-import express from "express";
+import express, { response } from "express";
+import axios from 'axios';
 import path from "path";
 import dbConnect from "../config/dbConnect.js";
 import { globalErrhandler, notFound } from "../middlewares/globalErrHandler.js";
@@ -21,69 +22,6 @@ dbConnect();
 const app = express();
 //cors
 app.use(cors());
-//Stripe webhook
-//stripe instance
-const stripe = new Stripe(process.env.STRIPE_KEY);
-
-// This is your Stripe CLI webhook secret for testing your endpoint locally.
-const endpointSecret =
-  "whsec_2a222b6d6b7abb9982f25d1da9e63f4d0a78f6935259e4ff65cae8df7b5fdde5";
-
-app.post(
-  "/webhook",
-  express.raw({ type: "application/json" }),
-  async (request, response) => {
-    const sig = request.headers["stripe-signature"];
-
-    let event;
-
-    try {
-      event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
-      console.log("event");
-    } catch (err) {
-      console.log("err", err.message);
-      response.status(400).send(`Webhook Error: ${err.message}`);
-      return;
-    }
-    if (event.type === "checkout.session.completed") {
-      //update the order
-      const session = event.data.object;
-      const { orderId } = session.metadata;
-      const paymentStatus = session.payment_status;
-      const paymentMethod = session.payment_method_types[0];
-      const totalAmount = session.amount_total;
-      const currency = session.currency;
-      //find the order
-      const order = await Order.findByIdAndUpdate(
-        JSON.parse(orderId),
-        {
-          totalPrice: totalAmount / 100,
-          currency,
-          paymentMethod,
-          paymentStatus,
-        },
-        {
-          new: true,
-        }
-      );
-      console.log(order);
-    } else {
-      return;
-    }
-    // // Handle the event
-    // switch (event.type) {
-    //   case "payment_intent.succeeded":
-    //     const paymentIntent = event.data.object;
-    //     // Then define and call a function to handle the event payment_intent.succeeded
-    //     break;
-    //   // ... handle other event types
-    //   default:
-    //     console.log(`Unhandled event type ${event.type}`);
-    // }
-    // Return a 200 response to acknowledge receipt of the event
-    response.send();
-  }
-);
 
 //pass incoming data
 app.use(express.json());
@@ -97,6 +35,33 @@ app.use(express.static("public"));
 app.get("/", (req, res) => {
   res.sendFile(path.join("public", "index.html"));
 });
+
+//Webhook Tap Payment
+app.post("/webhook", async (request, response) => {
+  console.log("Webhook Received");
+  if (request.body.status === "CAPTURED") {
+    console.log(request.body.source.payment_method);
+    console.log(request.body.status);
+    const { orderId } = request.body.reference.order;
+    const paymentStatus = request.body.status;
+    const paymentMethod = request.body.source.payment_method;
+    const totalAmount = request.body.amount;
+    //find the order
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      {
+        totalPrice: totalAmount,
+        paymentMethod,
+        paymentStatus,
+      },
+      {
+        new: true,
+      }
+    );
+  }
+  response.sendStatus(200);
+})
+
 app.use("/api/v1/users/", userRoutes);
 app.use("/api/v1/products/", productsRouter);
 app.use("/api/v1/categories/", categoriesRouter);

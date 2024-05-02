@@ -1,38 +1,23 @@
 import asyncHandler from "express-async-handler";
 import dotenv from "dotenv";
 dotenv.config();
-import Stripe from "stripe";
 import Order from "../model/Order.js";
 import Product from "../model/Product.js";
 import User from "../model/User.js";
+import axios from 'axios';
 import Coupon from "../model/Coupon.js";
+
+
+
 //@desc create orders
 //@route POST /api/v1/orders
 //@access private
 
-//stripe instance
-const stripe = new Stripe(process.env.STRIPE_KEY);
-
 export const createOrderCtrl = asyncHandler(async (req, res) => {
-  // //get teh coupon
-  // const { coupon } = req?.query;
-
-  // const couponFound = await Coupon.findOne({
-  //   code: coupon?.toUpperCase(),
-  // });
-  // if (couponFound?.isExpired) {
-  //   throw new Error("Coupon has expired");
-  // }
-  // if (!couponFound) {
-  //   throw new Error("Coupon does exists");
-  // }
-
-  //get discount
-  // const discount = couponFound?.discount / 100;
 
   //Get the payload(customer, orderItems, shipppingAddress, totalPrice);
   const { orderItems, shippingAddress, totalPrice } = req.body;
-  console.log(req.body);
+  //console.log(req.body);
   //Find the user
   const user = await User.findById(req.userAuthId);
   //Check if user has shipping address
@@ -48,7 +33,6 @@ export const createOrderCtrl = asyncHandler(async (req, res) => {
     user: user?._id,
     orderItems,
     shippingAddress,
-    // totalPrice: couponFound ? totalPrice - totalPrice * discount : totalPrice,
     totalPrice,
   });
 
@@ -68,12 +52,12 @@ export const createOrderCtrl = asyncHandler(async (req, res) => {
   user.orders.push(order?._id);
   await user.save();
 
-  //make payment (stripe)
-  //convert order items to have same structure that stripe need
+  //make payment (Tap)
+  //convert order items to have same structure that Tap need
   const convertedOrders = orderItems.map((item) => {
     return {
       price_data: {
-        currency: "usd",
+        currency: "KWD",
         product_data: {
           name: item?.name,
           description: item?.description,
@@ -83,17 +67,50 @@ export const createOrderCtrl = asyncHandler(async (req, res) => {
       quantity: item?.qty,
     };
   });
-  const session = await stripe.checkout.sessions.create({
-    line_items: convertedOrders,
-    metadata: {
-      orderId: JSON.stringify(order?._id),
+
+  const options = {
+    method: 'POST',
+    url: 'https://api.tap.company/v2/charges/',
+    headers: {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      Authorization: 'Bearer ' + process.env.TAP_TestSecretKey
     },
-    mode: "payment",
-    success_url: "http://localhost:3000/success",
-    cancel_url: "http://localhost:3000/cancel",
-  });
-  res.send({ url: session.url });
+    data: {
+      amount: totalPrice,
+      currency: 'KWD',
+      customer_initiated: true,
+      threeDSecure: true,
+      save_card: false,
+      description: 'Test Description',
+      metadata: {udf1: 'Metadata 1'},
+      reference: {transaction: 'txn_01', order: order?._id},
+      receipt: {email: true, sms: true},
+      customer: {
+        first_name: user.shippingAddress.firstName,
+        middle_name: '',
+        last_name: user.shippingAddress.lastName,
+        email: 'aawadh73@gmail.com',
+        phone: {country_code: 965, number: 65911176}
+      },
+      merchant: {id: process.env.TAP_MerchantID},
+      source: {id: 'src_kw.knet'},
+      post: {url: 'https://ecommerce-api-am-h3rh.onrender.com/api/v1/webhook'},
+      redirect: {url: 'http://localhost:3000/success'}
+    }
+  };
+  
+  axios
+    .request(options)
+    .then(function (response) {
+      //console.log(response.data);
+      res.send({ url: response.data.transaction.url });
+    })
+    .catch(function (error) {
+      console.error(error);
+    });
 });
+
 
 //@desc get all orders
 //@route GET /api/v1/orders
@@ -108,6 +125,7 @@ export const getAllordersCtrl = asyncHandler(async (req, res) => {
     orders,
   });
 });
+
 
 //@desc get single order
 //@route GET /api/v1/orders/:id
@@ -125,6 +143,7 @@ export const getSingleOrderCtrl = asyncHandler(async (req, res) => {
   });
 });
 
+
 //@desc update order to delivered
 //@route PUT /api/v1/orders/update/:id
 //@access private/admin
@@ -132,6 +151,15 @@ export const getSingleOrderCtrl = asyncHandler(async (req, res) => {
 export const updateOrderCtrl = asyncHandler(async (req, res) => {
   //get the id from params
   const id = req.params.id;
+  axios
+    .request(options)
+    .then(function (response) {
+      console.log(response.data);
+    })
+    .catch(function (error) {
+      console.error(error);
+    });
+
   //update
   const updatedOrder = await Order.findByIdAndUpdate(
     id,
@@ -148,6 +176,7 @@ export const updateOrderCtrl = asyncHandler(async (req, res) => {
     updatedOrder,
   });
 });
+
 
 //@desc get sales sum of orders
 //@route GET /api/v1/orders/sales/sum

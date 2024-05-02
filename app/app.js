@@ -42,18 +42,18 @@ app.post("/api/v1/webhook", async (request, response) => {
     console.log(request.body.source.payment_method);
     console.log(request.body.status);
     const { orderId } = request.body.reference.order;
-    const paymentStatus = request.body.status;
-    const paymentMethod = request.body.source.payment_method;
+    const paymentStatusa = request.body.status;
+    const paymentMethoda = request.body.source.payment_method;
     const totalAmount = request.body.amount;
-    const chargeId = request.body.id;
+    const chargeIda = request.body.id;
     //find the order
     const order = await Order.findByIdAndUpdate(
       orderId,
       {
         totalPrice: totalAmount,
-        paymentMethod,
-        paymentStatus,
-        chargeId,
+        paymentMethod: paymentMethoda,
+        paymentStatus: paymentStatusa,
+        chargeId: chargeIda,
       },
       {
         new: true,

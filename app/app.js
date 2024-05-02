@@ -37,30 +37,26 @@ app.get("/", (req, res) => {
 });
 
 //Webhook Tap Payment
-app.post("/api/v1/webhook", async (request, response) => {
+app.post("/api/v1/webhook", express.raw({ type: "application/json" }),async (request, response) => {
   console.log("Webhook Received");
     console.log(request.body.source.payment_method);
     console.log(request.body.status);
-    const { orderId } = request.body.reference.order;
-    const paymentStatusa = request.body.status;
-    const paymentMethoda = request.body.source.payment_method;
-    const totalAmount = request.body.amount;
-    const chargeIda = request.body.id;
+    console.log(request.body.reference.order);
     //find the order
     const order = await Order.findByIdAndUpdate(
-      orderId,
+      request.body.reference.order,
       {
-        totalPrice: totalAmount,
-        paymentMethod: paymentMethoda,
-        paymentStatus: paymentStatusa,
-        chargeId: chargeIda,
+        totalPrice: 10,
+        paymentMethod: request.body.source.payment_method,
+        paymentStatus: request.body.status,
+        chargeId: request.body.id,
       },
       {
         new: true,
       }
     );
   response.sendStatus(200);
-})
+});
 
 app.use("/api/v1/users/", userRoutes);
 app.use("/api/v1/products/", productsRouter);

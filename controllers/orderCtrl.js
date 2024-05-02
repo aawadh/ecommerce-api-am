@@ -151,15 +151,7 @@ export const getSingleOrderCtrl = asyncHandler(async (req, res) => {
 export const updateOrderCtrl = asyncHandler(async (req, res) => {
   //get the id from params
   const id = req.params.id;
-  axios
-    .request(options)
-    .then(function (response) {
-      console.log(response.data);
-    })
-    .catch(function (error) {
-      console.error(error);
-    });
-
+  
   //update
   const updatedOrder = await Order.findByIdAndUpdate(
     id,

@@ -16,6 +16,9 @@ import reviewRouter from "../routes/reviewRouter.js";
 import userRoutes from "../routes/usersRoute.js";
 import Order from "../model/Order.js";
 import couponsRouter from "../routes/couponsRouter.js";
+import bodyParser from "body-parser";
+import { sendPDFInvoice, sendOrderDetailsCustomer } from "../utils/whatsapp.js";
+
 
 //db connect
 dbConnect();
@@ -36,12 +39,20 @@ app.get("/", (req, res) => {
   res.sendFile(path.join("public", "index.html"));
 });
 
+//Whatsapp Messaging
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
+
+//Send Whatsapp message
+app.post('/api/v1/sendMessage', (req, response) => {
+  sendOrderDetailsCustomer();
+  response.sendStatus(200);
+});
+
 //Webhook Tap Payment
 app.post("/api/v1/webhook", express.raw({ type: "application/json" }),async (request, response) => {
-  console.log("Webhook Received");
-    console.log(request.body.source.payment_method);
-    console.log(request.body.status);
-    console.log(request.body.reference.order);
     //find the order
     const order = await Order.findByIdAndUpdate(
       request.body.reference.order,
@@ -55,7 +66,11 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }),async (req
         new: true,
       }
     );
-  response.sendStatus(200);
+    if (paymentStatus === "CAPTURED"){
+      //Send order details
+      sendOrderDetailsCustomer();
+    }
+    response.sendStatus(200);
 });
 
 app.use("/api/v1/users/", userRoutes);

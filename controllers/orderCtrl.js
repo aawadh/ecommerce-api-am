@@ -74,7 +74,7 @@ export const createOrderCtrl = asyncHandler(async (req, res) => {
     headers: {
       accept: 'application/json',
       'content-type': 'application/json',
-      Authorization: 'Bearer ' + process.env.TAP_ProdSecretKey
+      Authorization: 'Bearer ' + process.env.TAP_TestSecretKey
     },
     data: {
       amount: totalPrice,

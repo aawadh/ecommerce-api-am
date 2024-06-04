@@ -19,6 +19,7 @@ import couponsRouter from "../routes/couponsRouter.js";
 import bodyParser from "body-parser";
 import { sendPDFInvoice, sendOrderDetailsCustomer } from "../utils/whatsapp.js";
 
+const mytoken = process.env.MYTOKEN;
 
 //db connect
 dbConnect();
@@ -51,6 +52,25 @@ app.post('/api/v1/sendMessage', (req, response) => {
   response.sendStatus(200);
 });
 
+//Whatsapp message webhook
+app.get("/api/v1/WhatsappWebhook",(req,res)=>{
+  let mode=req.query["hub.mode"];
+  let challange=req.query["hub.challenge"];
+  let token=req.query["hub.verify_token"];
+
+
+   if(mode && token){
+
+       if(mode==="subscribe" && token===mytoken){
+           res.status(200).send(challange);
+       }else{
+           res.status(403);
+       }
+
+   }
+
+});
+
 //Webhook Tap Payment
 app.post("/api/v1/webhook", express.raw({ type: "application/json" }),async (request, response) => {
     //find the order
@@ -68,7 +88,7 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }),async (req
     );
     if (paymentStatus === "CAPTURED"){
       //Send order details
-      sendOrderDetailsCustomer();
+      //sendOrderDetailsCustomer();
     }
     response.sendStatus(200);
 });

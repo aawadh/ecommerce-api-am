@@ -96,7 +96,7 @@ export const createOrderCtrl = asyncHandler(async (req, res) => {
       merchant: {id: process.env.TAP_MerchantID},
       source: {id: 'src_kw.knet'},
       post: {url: 'https://ecommerce-api-am-h3rh.onrender.com/api/v1/webhook'},
-      redirect: {url: 'http://localhost:3000/success'}
+      redirect: {url: 'http://ameen.ltd/success'}
     }
   };
 

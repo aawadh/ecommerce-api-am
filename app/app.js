@@ -152,7 +152,7 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (re
       Governate: "Governate"
     },
     Products: invoiceProductItems,
-    Total: totalPrice,
+    Total: order.totalPrice,
   };
 
   convertToPDF(htmlContent, outputFile)

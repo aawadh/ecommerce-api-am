@@ -128,7 +128,7 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (re
   const date = new Date();
   const today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
-  const invoiceProductItems = orderItems.map((item) => {
+  const invoiceProductItems = order.orderItems.map((item) => {
     return {
       name: item?.name,
       description: item?.description,

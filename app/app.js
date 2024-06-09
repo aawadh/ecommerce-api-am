@@ -155,9 +155,11 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (re
     Total: order.totalPrice,
   };
 
+  const outputFile = 'output.pdf';
+
   convertToPDF(htmlContent, outputFile)
-      .then(() => console.log("PDF Created"))
-      .catch(err => console.error('Error:', err));
+    .then(() => console.log("PDF Created"))
+    .catch(err => console.error('Error:', err));
 
   const pdf = invoiceUpload();
 

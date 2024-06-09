@@ -5,7 +5,8 @@ import fetch from "node-fetch";
 import fs from "fs";
 
 
-export const sendOrderDetailsCustomer = asyncHandler(async (req, res) => {
+
+export function sendOrderDetailsCustomer (name, orderId, totalPrice, Ameen) {
     const options = {
         method: 'POST',
         url: 'https://graph.facebook.com/v' + process.env.WHATSAPP_VERSION + '/' + process.env.WHATSAPP_PHONE_NUMBER_ID + '/messages',
@@ -18,10 +19,33 @@ export const sendOrderDetailsCustomer = asyncHandler(async (req, res) => {
             to: process.env.DELEVIRY_MANAGER_NUMBER,
             type: 'template',
             template: {
-                name: 'hello_world',
+                name: 'order_message',
                 language: {
-                    code: 'en_US'
-                }
+                    code: 'ar'
+                },
+                components: [
+                    {
+                        type: 'body',
+                        parameters: [
+                            {
+                                type: 'text',
+                                text: name
+                            },
+                            {
+                                type: 'text',
+                                text: orderId
+                            },
+                            {
+                                type: 'text',
+                                text: totalPrice
+                            },
+                            {
+                                type: 'text',
+                                text: Ameen
+                            },
+                        ]
+                    }
+                ]
             }
         },
         json: true
@@ -32,8 +56,8 @@ export const sendOrderDetailsCustomer = asyncHandler(async (req, res) => {
         .catch(function (error) {
             console.error(error);
         });
-
-});
+};
+    
 
 export const sendOrderDetailsDeliveryManager = asyncHandler(async (req, res) => {
     const options = {

@@ -18,6 +18,11 @@ import Order from "../model/Order.js";
 import couponsRouter from "../routes/couponsRouter.js";
 import bodyParser from "body-parser";
 import { sendPDFInvoice, sendOrderDetailsCustomer } from "../utils/whatsapp.js";
+import { convertToPDF } from "../utils/invoice.js";
+import { invoiceUpload } from "../config/invoiceUpload.js";
+import Product from "../model/Product.js";
+import User from "../model/User.js";
+
 
 const mytoken = process.env.MYTOKEN;
 
@@ -43,54 +48,139 @@ app.get("/", (req, res) => {
 //Whatsapp Messaging
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
-    extended: false
+  extended: false
 }));
 
 //Send Whatsapp message
 app.post('/api/v1/sendMessage', (req, response) => {
-  sendOrderDetailsCustomer();
+  //sendOrderDetailsCustomer('العميل','1234','60','امين');
+  // const htmlContent = {
+  //   Name: "Ali",
+  //   Phone: "65911176",
+  //   orderId: "123456",
+  //   Vendor: "Ameen",
+  //   CreatedBy: "January 1, 2023",
+  //   Due: "January 3, 2023",
+  //   Address: {
+  //     Area: "Area",
+  //     Block: "2",
+  //     Street: "5",
+  //     HouseNumber: "12",
+  //     Governate: "Governate"
+  //   },
+  //   Products: [
+  //     {
+  //       name: "Shirt",
+  //       price: "10",
+  //       qty: "2",
+  //     },
+  //     {
+  //       name: "Dress",
+  //       price: "30",
+  //       qty: "3",
+  //     },
+  //     {
+  //       name: "short",
+  //       price: "20",
+  //       qty: "1",
+  //     },
+  //   ],
+  //   Total: "63",
+  // };
+  // const outputFile = 'output.pdf';
+
+  // convertToPDF(htmlContent, outputFile)
+  //   .then(() => console.log("PDF Created"))
+  //   .catch(err => console.error('Error:', err));
+
+  // const pdf = invoiceUpload();
+
   response.sendStatus(200);
 });
 
 //Whatsapp message webhook
-app.get("/api/v1/WhatsappWebhook",(req,res)=>{
-  let mode=req.query["hub.mode"];
-  let challange=req.query["hub.challenge"];
-  let token=req.query["hub.verify_token"];
+app.get("/api/v1/WhatsappWebhook", (req, res) => {
+  let mode = req.query["hub.mode"];
+  let challange = req.query["hub.challenge"];
+  let token = req.query["hub.verify_token"];
 
+  if (mode && token) {
 
-   if(mode && token){
+    if (mode === "subscribe" && token === mytoken) {
+      res.status(200).send(challange);
+    } else {
+      res.status(403);
+    }
 
-       if(mode==="subscribe" && token===mytoken){
-           res.status(200).send(challange);
-       }else{
-           res.status(403);
-       }
-
-   }
+  }
 
 });
 
 //Webhook Tap Payment
-app.post("/api/v1/webhook", express.raw({ type: "application/json" }),async (request, response) => {
-    //find the order
-    const order = await Order.findByIdAndUpdate(
-      request.body.reference.order,
-      {
-        totalPrice: 10,
-        paymentMethod: request.body.source.payment_method,
-        paymentStatus: request.body.status,
-        chargeId: request.body.id,
-      },
-      {
-        new: true,
-      }
-    );
-    if (paymentStatus === "CAPTURED"){
-      //Send order details
-      //sendOrderDetailsCustomer();
+app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (request, response) => {
+
+  //Find the user
+  const order = await order.findById(request.body.reference.order);
+
+  //Find the user
+  const user = await User.findById(order.user);
+
+  const date = new Date();
+  const today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  const invoiceProductItems = orderItems.map((item) => {
+    return {
+      name: item?.name,
+      description: item?.description,
+      price: item?.price * 100,
+      quantity: item?.qty,
+    };
+  });
+
+  const htmlContent = {
+    Name: user.fullname,
+    Phone: user.shippingAddress.phone,
+    orderId: order?._id,
+    Vendor: "Ameen",
+    CreatedBy: today,
+    Due: "January 3, 2023",
+    Address: {
+      Area: "Area",
+      Block: "2",
+      Street: "5",
+      HouseNumber: "12",
+      Governate: "Governate"
+    },
+    Products: invoiceProductItems,
+    Total: totalPrice,
+  };
+
+  convertToPDF(htmlContent, outputFile)
+      .then(() => console.log("PDF Created"))
+      .catch(err => console.error('Error:', err));
+
+  const pdf = invoiceUpload();
+
+  //find the order
+  const orderUpdate = await Order.findByIdAndUpdate(
+    request.body.reference.order,
+    {
+      totalPrice: request.body.amount,
+      paymentMethod: request.body.source.payment_method,
+      paymentStatus: request.body.status,
+      chargeId: request.body.id,
+      invoice: pdf,
+    },
+    {
+      new: true,
     }
-    response.sendStatus(200);
+  );
+
+  if (paymentStatus === "CAPTURED") {
+    //Send order details
+    sendOrderDetailsCustomer(request.body.customer.first_name, request.body.reference.order, totalPrice, 'امين');
+  }
+  response.sendStatus(200);
 });
 
 app.use("/api/v1/users/", userRoutes);

@@ -53,6 +53,9 @@ const OrderSchema = new Schema(
     deliveredAt: {
       type: Date,
     },
+    invoice: {
+      type: String,
+    },
   },
   {
     timestamps: true,

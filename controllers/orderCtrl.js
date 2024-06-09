@@ -6,6 +6,8 @@ import Product from "../model/Product.js";
 import User from "../model/User.js";
 import axios from 'axios';
 import Coupon from "../model/Coupon.js";
+import { convertToPDF } from "../utils/invoice.js";
+import cloudinaryPackage from "cloudinary";
 
 
 
@@ -17,7 +19,7 @@ export const createOrderCtrl = asyncHandler(async (req, res) => {
 
   //Get the payload(customer, orderItems, shipppingAddress, totalPrice);
   const { orderItems, shippingAddress, totalPrice } = req.body;
-  //console.log(req.body);
+
   //Find the user
   const user = await User.findById(req.userAuthId);
   //Check if user has shipping address
@@ -28,6 +30,7 @@ export const createOrderCtrl = asyncHandler(async (req, res) => {
   if (orderItems?.length <= 0) {
     throw new Error("No Order Items");
   }
+
   //Place/create order - save into DB
   const order = await Order.create({
     user: user?._id,
@@ -108,6 +111,8 @@ export const createOrderCtrl = asyncHandler(async (req, res) => {
     .catch(function (error) {
       console.error(error);
     });
+    
+    res.status(200);
 });
 
 

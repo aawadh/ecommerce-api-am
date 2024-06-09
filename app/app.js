@@ -120,7 +120,7 @@ app.get("/api/v1/WhatsappWebhook", (req, res) => {
 app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (request, response) => {
 
   //Find the user
-  const order = await order.findById(request.body.reference.order);
+  const order = await Order.findById(request.body.reference.order);
 
   //Find the user
   const user = await User.findById(order.user);

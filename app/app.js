@@ -72,7 +72,6 @@ app.post('/api/v1/sendMessage', (req, response) => {
       {
         name: "فستان",
         price: "10",
-        qty: "2",
       },
       {
         name: "سترة",
@@ -82,7 +81,6 @@ app.post('/api/v1/sendMessage', (req, response) => {
       {
         name: "عباية",
         price: "20",
-        qty: "1",
       },
     ],
     Total: "63",
@@ -91,13 +89,18 @@ app.post('/api/v1/sendMessage', (req, response) => {
   let invoiceProducts = '';
 
   htmlContent.Products.map((item) => {
-     invoiceProducts = invoiceProducts + `${item.name} ${item.price}، `
-  });
+    let itemQty = 1;
+    if(item.qty != undefined){
+      itemQty = item.qty;
+    }
+    console.log(item.qty);
+     invoiceProducts = invoiceProducts + `${itemQty} من ${item.name} بسعر ${item.price}، `;
+      });
 
    const invoiceAddress = `المنطقة: ${htmlContent.Address.Area} ، القطعة:، ${htmlContent.Address.Block} ، الشارع: ${htmlContent.Address.Street} ، منزل: ${htmlContent.Address.HouseNumber} ، المحافظة: ${htmlContent.Address.Governate}.`
+console.log(invoiceProducts);
 
-
- sendOrderDetailsDeliveryManager(htmlContent.orderId, htmlContent.Name, htmlContent.Phone, invoiceAddress, invoiceProducts, htmlContent.Total);
+ //sendOrderDetailsDeliveryManager(htmlContent.orderId, htmlContent.Name, htmlContent.Phone, invoiceAddress, invoiceProducts, htmlContent.Total);
 
   //sendOrderDetailsDeliveryManager("123456", "العميل", "65911176", "المنطقة: المنطقة ، القطعة:، 2 ، الشارع: 5 ، منزل: 12 ، المحافظة: المحافظة.", "فستان 10 سترة 30عباية 20", "63");
 
@@ -136,7 +139,7 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (re
 
   const invoiceProductItems = order.orderItems.map((item) => {
     let itemQuantity = 1;
-    if (item.qty.length > 0) {
+    if (item.qty != undefined) {
       itemQuantity = item?.qty;
     }
     return {

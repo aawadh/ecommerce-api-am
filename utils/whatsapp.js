@@ -59,7 +59,7 @@ export function sendOrderDetailsCustomer(name, orderId, totalPrice, Ameen) {
 };
 
 
-export function sendOrderDetailsDeliveryManager(name, filename, outputfile) {
+export function sendOrderDetailsDeliveryManager(orderId, name, phone, address, products, price) {
     const options = {
         method: 'POST',
         url: 'https://graph.facebook.com/v' + process.env.WHATSAPP_VERSION + '/' + process.env.WHATSAPP_PHONE_NUMBER_ID + '/messages',
@@ -72,7 +72,7 @@ export function sendOrderDetailsDeliveryManager(name, filename, outputfile) {
             to: process.env.DELEVIRY_MANAGER_NUMBER,
             type: 'template',
             template: {
-                name: 'vendor_reciept',
+                name: 'vendor_order',
                 language: {
                     code: 'ar'
                 },
@@ -82,18 +82,31 @@ export function sendOrderDetailsDeliveryManager(name, filename, outputfile) {
                         parameters: [
                             {
                                 type: 'text',
+                                text: orderId
+                            },
+                            {
+                                type: 'text',
                                 text: name
                             },
                             {
-                                type: 'document',
-                                document:  {
-                                    id: outputfile,
-                                    filename: filename,
-                                  }
-                            }
+                                type: 'text',
+                                text: phone
+                            },
+                            {
+                                type: 'text',
+                                text: address
+                            },
+                            {
+                                type: 'text',
+                                text: products
+                            },
+                            {
+                                type: 'text',
+                                text: price
+                            },
                         ]
                     }
-                ],
+                ]
             }
         },
         json: true

@@ -55,46 +55,51 @@ app.use(bodyParser.urlencoded({
 app.post('/api/v1/sendMessage', (req, response) => {
   //sendOrderDetailsCustomer('العميل','1234','60','امين');
   const htmlContent = {
-    Name: "Ali",
+    Name: "العميل",
     Phone: "65911176",
     orderId: "123456",
     Vendor: "Ameen",
     CreatedBy: "January 1, 2023",
     Due: "January 3, 2023",
     Address: {
-      Area: "Area",
+      Area: "المنطقة",
       Block: "2",
       Street: "5",
       HouseNumber: "12",
-      Governate: "Governate"
+      Governate: "المحافظة"
     },
     Products: [
       {
-        name: "Shirt",
+        name: "فستان",
         price: "10",
         qty: "2",
       },
       {
-        name: "Dress",
+        name: "سترة",
         price: "30",
         qty: "3",
       },
       {
-        name: "short",
+        name: "عباية",
         price: "20",
         qty: "1",
       },
     ],
     Total: "63",
   };
-  const outputFile = 'output.pdf';
 
-  convertToPDF(htmlContent, outputFile)
-    .then(() => console.log("PDF Created"))
-    .catch(err => console.error('Error:', err));
+  let invoiceProducts = '';
 
-    //sendOrderDetailsDeliveryManager('العميل','invoice.pdf','output.pdf',)
-  const pdf = invoiceUpload();
+  htmlContent.Products.map((item) => {
+     invoiceProducts = invoiceProducts + `${item.name} ${item.price}، `
+  });
+
+   const invoiceAddress = `المنطقة: ${htmlContent.Address.Area} ، القطعة:، ${htmlContent.Address.Block} ، الشارع: ${htmlContent.Address.Street} ، منزل: ${htmlContent.Address.HouseNumber} ، المحافظة: ${htmlContent.Address.Governate}.`
+
+
+ sendOrderDetailsDeliveryManager(htmlContent.orderId, htmlContent.Name, htmlContent.Phone, invoiceAddress, invoiceProducts, htmlContent.Total);
+
+  //sendOrderDetailsDeliveryManager("123456", "العميل", "65911176", "المنطقة: المنطقة ، القطعة:، 2 ، الشارع: 5 ، منزل: 12 ، المحافظة: المحافظة.", "فستان 10 سترة 30عباية 20", "63");
 
   response.sendStatus(200);
 });
@@ -156,14 +161,6 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (re
     Total: order.totalPrice,
   };
 
-  const outputFile = 'output.pdf';
-
-  const pdf = convertToPDF(htmlContent, outputFile)
-    .then(() => console.log("PDF Created"))
-    .catch(err => console.error('Error:', err));
-
-  const pdfURL = await invoiceUpload();
-
   //find the order
   const orderUpdate = await Order.findByIdAndUpdate(
     request.body.reference.order,
@@ -179,9 +176,18 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (re
     }
   );
 
+  let invoiceProducts = '';
+
+  htmlContent.Products.map((item) => {
+     invoiceProducts = invoiceProducts + `${item.qty} من ${item.name} بسعر ${item.price}، `
+  });
+
+   const invoiceAddress = `المنطقة: ${htmlContent.Address.Area} ، القطعة:، ${htmlContent.Address.Block} ، الشارع: ${htmlContent.Address.Street} ، منزل: ${htmlContent.Address.HouseNumber} ، المحافظة: ${htmlContent.Address.Governate}.`
+
   if (paymentStatus === "CAPTURED") {
     //Send order details
     sendOrderDetailsCustomer(request.body.customer.first_name, request.body.reference.order, totalPrice, 'امين');
+    sendOrderDetailsDeliveryManager(htmlContent.orderId, htmlContent.Name, htmlContent.Phone, invoiceAddress, invoiceProducts, htmlContent.Total);
   }
   response.sendStatus(200);
 });

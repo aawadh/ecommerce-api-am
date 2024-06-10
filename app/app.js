@@ -169,7 +169,6 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (re
       paymentMethod: request.body.source.payment_method,
       paymentStatus: request.body.status,
       chargeId: request.body.id,
-      invoice: pdf,
     },
     {
       new: true,

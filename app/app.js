@@ -135,10 +135,9 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (re
   const today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
   const invoiceProductItems = order.orderItems.map((item) => {
-    if(item.qty.length < 0){
-      const itemQuantity  = 1;
-    }else{
-      const itemQuantity = item?.qty
+    let itemQuantity = 1;
+    if (item.qty.length > 0) {
+      itemQuantity = item?.qty;
     }
     return {
       name: item?.name,

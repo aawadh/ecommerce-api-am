@@ -146,7 +146,7 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (re
       name: item?.name,
       description: item?.description,
       price: item?.price,
-      quantity: itemQuantity,
+      qty: itemQuantity,
     };
   });
 

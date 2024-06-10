@@ -17,7 +17,7 @@ import userRoutes from "../routes/usersRoute.js";
 import Order from "../model/Order.js";
 import couponsRouter from "../routes/couponsRouter.js";
 import bodyParser from "body-parser";
-import { sendPDFInvoice, sendOrderDetailsCustomer } from "../utils/whatsapp.js";
+import { sendPDFInvoice, sendOrderDetailsCustomer, sendOrderDetailsDeliveryManager } from "../utils/whatsapp.js";
 import { convertToPDF } from "../utils/invoice.js";
 import { invoiceUpload } from "../config/invoiceUpload.js";
 import Product from "../model/Product.js";
@@ -54,46 +54,47 @@ app.use(bodyParser.urlencoded({
 //Send Whatsapp message
 app.post('/api/v1/sendMessage', (req, response) => {
   //sendOrderDetailsCustomer('العميل','1234','60','امين');
-  // const htmlContent = {
-  //   Name: "Ali",
-  //   Phone: "65911176",
-  //   orderId: "123456",
-  //   Vendor: "Ameen",
-  //   CreatedBy: "January 1, 2023",
-  //   Due: "January 3, 2023",
-  //   Address: {
-  //     Area: "Area",
-  //     Block: "2",
-  //     Street: "5",
-  //     HouseNumber: "12",
-  //     Governate: "Governate"
-  //   },
-  //   Products: [
-  //     {
-  //       name: "Shirt",
-  //       price: "10",
-  //       qty: "2",
-  //     },
-  //     {
-  //       name: "Dress",
-  //       price: "30",
-  //       qty: "3",
-  //     },
-  //     {
-  //       name: "short",
-  //       price: "20",
-  //       qty: "1",
-  //     },
-  //   ],
-  //   Total: "63",
-  // };
-  // const outputFile = 'output.pdf';
+  const htmlContent = {
+    Name: "Ali",
+    Phone: "65911176",
+    orderId: "123456",
+    Vendor: "Ameen",
+    CreatedBy: "January 1, 2023",
+    Due: "January 3, 2023",
+    Address: {
+      Area: "Area",
+      Block: "2",
+      Street: "5",
+      HouseNumber: "12",
+      Governate: "Governate"
+    },
+    Products: [
+      {
+        name: "Shirt",
+        price: "10",
+        qty: "2",
+      },
+      {
+        name: "Dress",
+        price: "30",
+        qty: "3",
+      },
+      {
+        name: "short",
+        price: "20",
+        qty: "1",
+      },
+    ],
+    Total: "63",
+  };
+  const outputFile = 'output.pdf';
 
-  // convertToPDF(htmlContent, outputFile)
-  //   .then(() => console.log("PDF Created"))
-  //   .catch(err => console.error('Error:', err));
+  convertToPDF(htmlContent, outputFile)
+    .then(() => console.log("PDF Created"))
+    .catch(err => console.error('Error:', err));
 
-  // const pdf = invoiceUpload();
+    //sendOrderDetailsDeliveryManager('العميل','invoice.pdf','output.pdf',)
+  const pdf = invoiceUpload();
 
   response.sendStatus(200);
 });
@@ -157,11 +158,11 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (re
 
   const outputFile = 'output.pdf';
 
-  convertToPDF(htmlContent, outputFile)
+  const pdf = convertToPDF(htmlContent, outputFile)
     .then(() => console.log("PDF Created"))
     .catch(err => console.error('Error:', err));
 
-  const pdf = invoiceUpload();
+  const pdfURL = await invoiceUpload();
 
   //find the order
   const orderUpdate = await Order.findByIdAndUpdate(

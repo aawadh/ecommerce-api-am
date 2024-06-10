@@ -6,7 +6,7 @@ import fs from "fs";
 
 
 
-export function sendOrderDetailsCustomer (name, orderId, totalPrice, Ameen) {
+export function sendOrderDetailsCustomer(name, orderId, totalPrice, Ameen) {
     const options = {
         method: 'POST',
         url: 'https://graph.facebook.com/v' + process.env.WHATSAPP_VERSION + '/' + process.env.WHATSAPP_PHONE_NUMBER_ID + '/messages',
@@ -57,9 +57,9 @@ export function sendOrderDetailsCustomer (name, orderId, totalPrice, Ameen) {
             console.error(error);
         });
 };
-    
 
-export const sendOrderDetailsDeliveryManager = asyncHandler(async (req, res) => {
+
+export function sendOrderDetailsDeliveryManager(name, filename, outputfile) {
     const options = {
         method: 'POST',
         url: 'https://graph.facebook.com/v' + process.env.WHATSAPP_VERSION + '/' + process.env.WHATSAPP_PHONE_NUMBER_ID + '/messages',
@@ -72,10 +72,28 @@ export const sendOrderDetailsDeliveryManager = asyncHandler(async (req, res) => 
             to: process.env.DELEVIRY_MANAGER_NUMBER,
             type: 'template',
             template: {
-                name: 'hello_world',
+                name: 'vendor_reciept',
                 language: {
-                    code: 'en_US'
-                }
+                    code: 'ar'
+                },
+                components: [
+                    {
+                        type: 'body',
+                        parameters: [
+                            {
+                                type: 'text',
+                                text: name
+                            },
+                            {
+                                type: 'document',
+                                document:  {
+                                    id: outputfile,
+                                    filename: filename,
+                                  }
+                            }
+                        ]
+                    }
+                ],
             }
         },
         json: true
@@ -86,11 +104,7 @@ export const sendOrderDetailsDeliveryManager = asyncHandler(async (req, res) => 
         .catch(function (error) {
             console.error(error);
         });
-    res.status(200).json({
-        success: true,
-        message: "Delivery manager Order Details Message",
-    });
-});
+};
 
 export const sendPDFInvoice = asyncHandler(async (req, res) => {
     // PDF Generation

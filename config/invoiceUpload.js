@@ -15,12 +15,12 @@ cloudinary.config({
 // }
 
 export async function invoiceUpload() {
-    const result = await cloudinary.uploader.upload("output.pdf")
-    .then(() => {
+    try {
+        let result = await cloudinary.uploader.upload("output.pdf");
         console.log(result.url);
-        return result.url;
-    })
-    .catch(err => console.error('Error:', err));
+    } catch (error) {
+        console.error(`Error: ${error}`);
+    }
 
 
 };

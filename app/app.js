@@ -183,7 +183,7 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (re
 
    const invoiceAddress = `المنطقة: ${htmlContent.Address.Area} ، القطعة:، ${htmlContent.Address.Block} ، الشارع: ${htmlContent.Address.Street} ، منزل: ${htmlContent.Address.HouseNumber} ، المحافظة: ${htmlContent.Address.Governate}.`
 
-  if (paymentStatus === "CAPTURED") {
+  if (request.body.status === "CAPTURED") {
     //Send order details
     sendOrderDetailsCustomer(request.body.customer.first_name, request.body.reference.order, totalPrice, 'امين');
     sendOrderDetailsDeliveryManager(htmlContent.orderId, htmlContent.Name, htmlContent.Phone, invoiceAddress, invoiceProducts, htmlContent.Total);

@@ -10,7 +10,6 @@ import { convertToPDF } from "../utils/invoice.js";
 import cloudinaryPackage from "cloudinary";
 
 
-
 //@desc create orders
 //@route POST /api/v1/orders
 //@access private
@@ -94,7 +93,7 @@ export const createOrderCtrl = asyncHandler(async (req, res) => {
         middle_name: '',
         last_name: user.shippingAddress.lastName,
         email: 'aawadh73@gmail.com',
-        phone: {country_code: 965, number: 65911176}
+        phone: {country_code: 965, number: user.phone}
       },
       merchant: {id: process.env.TAP_MerchantID},
       source: {id: 'src_kw.knet'},
@@ -111,7 +110,7 @@ export const createOrderCtrl = asyncHandler(async (req, res) => {
     .catch(function (error) {
       console.error(error);
     });
-    
+
     res.status(200);
 });
 

@@ -23,6 +23,10 @@ const CategorySchema = new Schema(
         ref: "Product",
       },
     ],
+    deliveryFee: {
+      type: String,
+      default: 3,
+    },
   },
   { timestamps: true }
 );

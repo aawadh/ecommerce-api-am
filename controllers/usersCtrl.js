@@ -10,9 +10,9 @@ import { verifyToken } from "../utils/verifyToken.js";
 // @access  Private/Admin
 
 export const registerUserCtrl = asyncHandler(async (req, res) => {
-  const { fullname, email, password } = req.body;
+  const { fullname, phone, password } = req.body;
   //Check user exists
-  const userExists = await User.findOne({ email });
+  const userExists = await User.findOne({ phone });
   if (userExists) {
     //throw
     throw new Error("User already exists");
@@ -23,7 +23,7 @@ export const registerUserCtrl = asyncHandler(async (req, res) => {
   //create the user
   const user = await User.create({
     fullname,
-    email,
+    phone,
     password: hashedPassword,
   });
   res.status(201).json({
@@ -37,10 +37,10 @@ export const registerUserCtrl = asyncHandler(async (req, res) => {
 // @access  Public
 
 export const loginUserCtrl = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { phone, password } = req.body;
   //Find the user in db by email only
   const userFound = await User.findOne({
-    email,
+    phone,
   });
   if (userFound && (await bcrypt.compare(password, userFound?.password))) {
     res.json({
@@ -75,10 +75,11 @@ export const updateShippingAddresctrl = asyncHandler(async (req, res) => {
   const {
     firstName,
     lastName,
-    address,
-    city,
-    postalCode,
-    province,
+    area,
+    block,
+    street,
+    houseNumber,
+    governate,
     phone,
     country,
   } = req.body;
@@ -88,10 +89,11 @@ export const updateShippingAddresctrl = asyncHandler(async (req, res) => {
       shippingAddress: {
         firstName,
         lastName,
-        address,
-        city,
-        postalCode,
-        province,
+        area,
+        block,
+        street,
+        houseNumber,
+        governate,
         phone,
         country,
       },

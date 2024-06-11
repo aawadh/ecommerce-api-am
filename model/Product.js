@@ -23,7 +23,7 @@ const ProductSchema = new Schema(
     },
     sizes: {
       type: [String],
-      enum: ["S", "M", "L", "XL", "XXL"],
+      enum: ["S", "M", "L", "XL", "XXL","N/A","Measurements"],
       required: true,
     },
     colors: {
@@ -65,6 +65,12 @@ const ProductSchema = new Schema(
       required: true,
       default: 0,
     },
+
+    deliveryFee: {
+      type: Number,
+      default: 3,
+    },
+
   },
   {
     timestamps: true,

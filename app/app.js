@@ -144,7 +144,7 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (re
     }
     return {
       name: item?.name,
-      description: item?.description,
+      size: item?.size,
       price: item?.price,
       qty: itemQuantity,
     };
@@ -152,17 +152,17 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (re
 
   const htmlContent = {
     Name: user.fullname,
-    Phone: user.shippingAddress.phone,
+    Phone: user.phone,
     orderId: order?._id,
     Vendor: "Ameen",
     CreatedBy: today,
     Due: "January 3, 2023",
     Address: {
-      Area: "Area",
-      Block: "2",
-      Street: "5",
-      HouseNumber: "12",
-      Governate: "Governate"
+      Area: user.shippingAddress.area,
+      Block: user.shippingAddress.block,
+      Street: user.shippingAddress.street,
+      HouseNumber: user.shippingAddress.houseNumber,
+      Governate: user.shippingAddress.governate,
     },
     Products: invoiceProductItems,
     Total: order.totalPrice,
@@ -185,7 +185,7 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (re
   let invoiceProducts = '';
 
   htmlContent.Products.map((item) => {
-     invoiceProducts = invoiceProducts + `${item.qty} من ${item.name} بسعر ${item.price}، `
+     invoiceProducts = invoiceProducts + `${item.qty} من ${item.name} بسعر ${item.price}، بقياس ${item.size}`
   });
 
    const invoiceAddress = `المنطقة: ${htmlContent.Address.Area} ، القطعة:، ${htmlContent.Address.Block} ، الشارع: ${htmlContent.Address.Street} ، منزل: ${htmlContent.Address.HouseNumber} ، المحافظة: ${htmlContent.Address.Governate}.`

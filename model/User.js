@@ -7,7 +7,7 @@ const UserShema = new Schema(
       type: String,
       required: true,
     },
-    email: {
+    phone: {
       type: String,
       required: true,
     },
@@ -42,19 +42,19 @@ const UserShema = new Schema(
       lastName: {
         type: String,
       },
-      address: {
+      area: {
         type: String,
       },
-      city: {
+      block: {
         type: String,
       },
-      postalCode: {
+      street: {
         type: String,
       },
-      province: {
+      houseNumber: {
         type: String,
       },
-      country: {
+      governate: {
         type: String,
       },
       phone: {

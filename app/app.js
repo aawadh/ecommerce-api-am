@@ -192,7 +192,7 @@ app.post("/api/v1/webhook", express.raw({ type: "application/json" }), async (re
 
   if (request.body.status === "CAPTURED") {
     //Send order details
-    sendOrderDetailsCustomer(request.body.customer.first_name, request.body.reference.order, request.body.amount, 'امين');
+    sendOrderDetailsCustomer(request.body.customer.first_name, request.body.reference.order, request.body.amount, 'امين', htmlContent.Phone);
     sendOrderDetailsDeliveryManager(htmlContent.orderId, htmlContent.Name, htmlContent.Phone, invoiceAddress, invoiceProducts, htmlContent.Total);
   }
   response.sendStatus(200);

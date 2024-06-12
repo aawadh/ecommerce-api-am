@@ -6,7 +6,7 @@ import fs from "fs";
 
 
 
-export function sendOrderDetailsCustomer(name, orderId, totalPrice, Ameen) {
+export function sendOrderDetailsCustomer(name, orderId, totalPrice, Ameen, customerNumber) {
     const options = {
         method: 'POST',
         url: 'https://graph.facebook.com/v' + process.env.WHATSAPP_VERSION + '/' + process.env.WHATSAPP_PHONE_NUMBER_ID + '/messages',
@@ -16,7 +16,7 @@ export function sendOrderDetailsCustomer(name, orderId, totalPrice, Ameen) {
         },
         data: {
             messaging_product: 'whatsapp',
-            to: process.env.DELEVIRY_MANAGER_NUMBER,
+            to: '965' + customerNumber,
             type: 'template',
             template: {
                 name: 'order_message',

@@ -7,7 +7,7 @@ import Product from "../model/Product.js";
 // @route   POST /api/v1/products
 // @access  Private/Admin
 export const createProductCtrl = asyncHandler(async (req, res) => {
-  const { name, description, category, sizes, colors, price, totalQty, brand } =
+  const { name, description, category, sizes, colors, price, totalQty, brand, deliveryPeriod } =
     req.body;
   const convertedImgs = req.files.map((file) => file?.path);
   //Product exists
@@ -46,6 +46,7 @@ export const createProductCtrl = asyncHandler(async (req, res) => {
     totalQty,
     brand,
     images: convertedImgs,
+    deliveryPeriod: [1,2],
   });
   //push the product into category
   categoryFound.products.push(product._id);
@@ -119,7 +120,7 @@ export const getProductsCtrl = asyncHandler(async (req, res) => {
   //page
   const page = parseInt(req.query.page) ? parseInt(req.query.page) : 1;
   //limit
-  const limit = parseInt(req.query.limit) ? parseInt(req.query.limit) : 20;
+  const limit = parseInt(req.query.limit) ? parseInt(req.query.limit) : 4;
   //startIdx
   const startIndex = (page - 1) * limit;
   //endIdx

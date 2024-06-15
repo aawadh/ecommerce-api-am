@@ -71,6 +71,15 @@ const ProductSchema = new Schema(
       default: 3,
     },
 
+    deliveryPeriod: [
+      {
+        type: Number,
+        default: [1,2]
+      }
+    ]
+
+    ,
+
   },
   {
     timestamps: true,

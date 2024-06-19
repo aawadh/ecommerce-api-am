@@ -68,13 +68,13 @@ const ProductSchema = new Schema(
 
     deliveryFee: {
       type: Number,
-      default: 3,
+      default: 2,
     },
 
     deliveryPeriod: [
       {
         type: Number,
-        default: [1,2]
+        default: [5,10]
       }
     ]
 

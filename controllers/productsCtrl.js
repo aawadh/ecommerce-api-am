@@ -7,7 +7,7 @@ import Product from "../model/Product.js";
 // @route   POST /api/v1/products
 // @access  Private/Admin
 export const createProductCtrl = asyncHandler(async (req, res) => {
-  const { name, description, category, sizes, colors, price, totalQty, brand, deliveryPeriod } =
+  const { name, description, category, sizes, colors, price, totalQty, brand, deliveryFee, deliveryPeriod } =
     req.body;
   const convertedImgs = req.files.map((file) => file?.path);
   //Product exists
@@ -46,7 +46,8 @@ export const createProductCtrl = asyncHandler(async (req, res) => {
     totalQty,
     brand,
     images: convertedImgs,
-    deliveryPeriod: [1,2],
+    deliveryFee,
+    deliveryPeriod,
   });
   //push the product into category
   categoryFound.products.push(product._id);
